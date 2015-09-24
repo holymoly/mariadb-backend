@@ -1,3 +1,3 @@
 # mariadb-backend
 
-A nodejs based Back-End for a time tracking.
+A nodejs/mariadb based Back-End for time tracking.
