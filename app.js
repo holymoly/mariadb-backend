@@ -2,10 +2,24 @@ var Hapi = require('hapi');
 var inspect = require('util').inspect;
 var query = require('./query'); //contains all queries
 var logger = require('./config/logging.js');
+var https = require('https');
+var fs = require('fs');
 
 var server = new Hapi.Server();
-server.connection({port: 3000});
-
+server.connection({ port: 3000,
+                    tls: {
+                      key: fs.readFileSync('./config/mariadb-backend-server-key.pem'),
+                      cert: fs.readFileSync('./config/mariadb-backend-server-cert.pem')
+                    }
+});
+/*
+var options = {
+  tls: {
+    key: fs.readFileSync('./config/mariadb-backend-server-key.pem'),
+    cert: fs.readFileSync('./config/mariadb-backend-server-cert.pem')
+  }
+};
+*/
 
 function replyResult(err, result, code, reply){
   if (err){
@@ -27,7 +41,6 @@ server.route([
                            endDate: req.query.endDate,
                            startTime: req.query.startTime,
                            endTime: req.query.endTime };
-        console.log(parameters);
         query.queryMaria(query.timeEntriesQuery, parameters, function(err, result){
           // Set HTTP Status Code
           var code = 200; // OK
@@ -166,7 +179,7 @@ server.route([
       handler: function(req, reply) {
         // add {id}to parameter as mitarbeiter
         var parameters = req.payload;
-        parameters['short'] =  req.params.id;
+        parameters.short =  req.params.id;
         query.queryMaria(query.createTimeEntryQuery, parameters, function(err, result){
           var code = 201;
           if(err){

@@ -153,6 +153,7 @@ function queryMaria(queryString,options, cb){
   var c = new Client();
   // Preparing the query
   var pq = c.prepare(queryString);
+  //console.log(pq(options));
   logger.info(pq(options));
   // Array which will store the rows
   var result = [];

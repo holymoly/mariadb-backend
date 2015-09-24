@@ -3,15 +3,28 @@ var app = require('../app.js').setLevel('test');
 var assert = require('assert');
 var request = require('request');
 
+var fs = require('fs');
+var path = require('path');
+var certFile = path.resolve('./config/maria-backend-client-cert.pem')
+var keyFile = path.resolve('./config/maria-backend-client-key.pem')
+var caFile = path.resolve('./config/mariadb-ca.pem')
+
 vows.describe('ApiCheck').addBatch({
-  'Post Employee short TST http://127.0.0.1:3000/tst/mitarbeiter': {
+  'Post Employee short TST https://127.0.0.1:3000/tst/mitarbeiter': {
     topic: function(){
-      request.post({url:'http://127.0.0.1:3000/tst/mitarbeiter',json: {     name:     'tst',
-                                                                            lastname: 'Mustermann',
-                                                                            short:    'TST',
-                                                                            email:    'dickeLiebhaber84@yahoo.com',
-                                                                            phone:    '0815',
-                                                                            locked:   '0' }}, this.callback)
+      request.post({
+        url: 'https://127.0.0.1:3000/tst/mitarbeiter',
+        cert: fs.readFileSync(certFile),
+        key: fs.readFileSync(keyFile),
+        ca: fs.readFileSync(caFile),
+        json:
+          { name:     'tst',
+            lastname: 'Mustermann',
+            short:    'TST',
+            email:    'dickeLiebhaber84@yahoo.com',
+            phone:    '0815',
+            locked:   '0'
+          }}, this.callback)
     },
     'should respond with 201': function (err, res, body) {
       assert.equal(res.statusCode, 201); //status is 200
@@ -23,11 +36,16 @@ vows.describe('ApiCheck').addBatch({
       assert.isObject(res);       // res is object
     }
   },
-  'Post Project http://127.0.0.1:3000/tst/projekte': {
+  'Post Project https://127.0.0.1:3000/tst/projekte': {
     topic: function(){
-      request.post({url:'http://127.0.0.1:3000/tst/projekte',json: {  name: 'Project1',
-                                                                      description: 'Project1 description',
-                                                                      idCustomer: '2'}}, this.callback)
+      request.post({
+        url:'https://127.0.0.1:3000/tst/projekte',
+        cert: fs.readFileSync(certFile),
+        key: fs.readFileSync(keyFile),
+        ca: fs.readFileSync(caFile),
+        json: { name: 'Project1',
+                description: 'Project1 description',
+                idCustomer: '2'}}, this.callback)
     },
     'should respond with 201': function (err, res, body) {
       assert.equal(res.statusCode, 201); //status is 200
@@ -39,11 +57,16 @@ vows.describe('ApiCheck').addBatch({
       assert.isObject(res);       // res is object
     }
   },
-  'Post Childproject http://127.0.0.1:3000/tst/teilprojekte': {
+  'Post Childproject https://127.0.0.1:3000/tst/teilprojekte': {
     topic: function(){
-      request.post({url:'http://127.0.0.1:3000/tst/teilprojekte',json: { name: 'Childproject1',
-                                                                            description: 'Childproject1 description',
-                                                                            idProject: '5'}}, this.callback)
+      request.post({
+        url:'https://127.0.0.1:3000/tst/teilprojekte',
+        cert: fs.readFileSync(certFile),
+        key: fs.readFileSync(keyFile),
+        ca: fs.readFileSync(caFile),
+        json: { name: 'Childproject1',
+                description: 'Childproject1 description',
+                idProject: '5'}}, this.callback)
     },
     'should respond with 201': function (err, res, body) {
       assert.equal(res.statusCode, 201); //status is 200
@@ -55,9 +78,14 @@ vows.describe('ApiCheck').addBatch({
       assert.isObject(res);       // res is object
     }
   },
-  'Post Customer http://127.0.0.1:3000/tst/kunde': {
+  'Post Customer https://127.0.0.1:3000/tst/kunde': {
     topic: function(){
-      request.post({url:'http://127.0.0.1:3000/tst/kunde',json: {  name: 'Customer1'}}, this.callback)
+      request.post({
+        url:'https://127.0.0.1:3000/tst/kunde',
+        cert: fs.readFileSync(certFile),
+        key: fs.readFileSync(keyFile),
+        ca: fs.readFileSync(caFile),
+        json: {  name: 'Customer1'}}, this.callback)
     },
     'should respond with 201': function (err, res, body) {
       assert.equal(res.statusCode, 201); //status is 200
@@ -69,11 +97,16 @@ vows.describe('ApiCheck').addBatch({
       assert.isObject(res);       // res is object
     }
   },
-  'Post Orte http://127.0.0.1:3000/tst/orte': {
+  'Post Orte https://127.0.0.1:3000/tst/orte': {
     topic: function(){
-      request.post({url:'http://127.0.0.1:3000/tst/orte',json: {  name: 'Place1',
-                                                                      x: 12,
-                                                                      y: 5 }}, this.callback)
+      request.post({
+        url:'https://127.0.0.1:3000/tst/orte',
+        cert: fs.readFileSync(certFile),
+        key: fs.readFileSync(keyFile),
+        ca: fs.readFileSync(caFile),
+        json: { name: 'Place1',
+                x: 12,
+                y: 5 }}, this.callback)
     },
     'should respond with 201': function (err, res, body) {
       assert.equal(res.statusCode, 201); //status is 200
@@ -85,13 +118,18 @@ vows.describe('ApiCheck').addBatch({
       assert.isObject(res);       // res is object
     }
   },
-  'Post Time http://127.0.0.1:3000/tst/zeiterfassung': {
+  'Post Time https://127.0.0.1:3000/tst/zeiterfassung': {
     topic: function(){
-      request.post({url:'http://127.0.0.1:3000/tst/zeiterfassung',json: {startTime:  '2015-09-01 08:00:00',
-                                                                      endTime:    '2015-09-01 010:00:00',
-                                                                      ort:        '2',
-                                                                      teilprojekt:'2',
-                                                                      arbeit:     'Hab was geschafft'}}, this.callback)
+      request.post({
+        url:'https://127.0.0.1:3000/tst/zeiterfassung',
+        cert: fs.readFileSync(certFile),
+        key: fs.readFileSync(keyFile),
+        ca: fs.readFileSync(caFile),
+        json: { startTime:  '2015-09-01 08:00:00',
+                endTime:    '2015-09-01 010:00:00',
+                ort:        '2',
+                teilprojekt:'2',
+                arbeit:     'Hab was geschafft'}}, this.callback)
     },
     'should respond with 201': function (err, res, body) {
       assert.equal(res.statusCode, 201); //status is 200
@@ -104,9 +142,13 @@ vows.describe('ApiCheck').addBatch({
     }
   }
 }).addBatch({
-  'Get Employees http://127.0.0.1:3000/tst/mitarbeiter': {
+  'Get Employees https://127.0.0.1:3000/tst/mitarbeiter': {
     topic: function(){
-      request({url:'http://127.0.0.1:3000/tst/mitarbeiter'}, this.callback)
+      request({
+        url:'https://127.0.0.1:3000/tst/mitarbeiter',
+        cert: fs.readFileSync(certFile),
+        key: fs.readFileSync(keyFile),
+        ca: fs.readFileSync(caFile),}, this.callback)
     },
     'should respond with 200': function (err, res, body) {
       assert.equal(res.statusCode, 200); //status is 200
@@ -131,9 +173,13 @@ vows.describe('ApiCheck').addBatch({
       assert.isTrue(Object.keys(JSON.parse(body)[0]).length === 8);
     }
   },
-  'Get Customers http://127.0.0.1:3000/tst/kunden': {
+  'Get Customers https://127.0.0.1:3000/tst/kunden': {
     topic: function(){
-      request({url:'http://127.0.0.1:3000/tst/kunden' }, this.callback)
+      request({
+        url:'https://127.0.0.1:3000/tst/kunden',
+        cert: fs.readFileSync(certFile),
+        key: fs.readFileSync(keyFile),
+        ca: fs.readFileSync(caFile), }, this.callback)
     },
     'should respond with 200': function (err, res, body) {
       assert.equal(res.statusCode, 200); //status is 200
@@ -153,9 +199,14 @@ vows.describe('ApiCheck').addBatch({
       assert.isTrue(Object.keys(JSON.parse(body)[0]).length === 3);
     }
   },
-  'Get Customer http://127.0.0.1:3000/tst/kunde': {
+  'Get Customer https://127.0.0.1:3000/tst/kunde': {
     topic: function(){
-      request({url:'http://127.0.0.1:3000/tst/kunde' ,qs: {name:'Customer1'}}, this.callback)
+      request({
+        url:'https://127.0.0.1:3000/tst/kunde',
+        cert: fs.readFileSync(certFile),
+        key: fs.readFileSync(keyFile),
+        ca: fs.readFileSync(caFile),
+       qs: {name:'Customer1'}}, this.callback)
     },
     'should respond with 200': function (err, res, body) {
       assert.equal(res.statusCode, 200); //status is 200
@@ -175,9 +226,13 @@ vows.describe('ApiCheck').addBatch({
       assert.isTrue(Object.keys(JSON.parse(body)[0]).length === 3);
     }
   },
-  'Get Places http://127.0.0.1:3000/tst/orte': {
+  'Get Places https://127.0.0.1:3000/tst/orte': {
     topic: function(){
-      request({url:'http://127.0.0.1:3000/tst/orte'}, this.callback)
+      request({
+        url:'https://127.0.0.1:3000/tst/orte',
+        cert: fs.readFileSync(certFile),
+        key: fs.readFileSync(keyFile),
+        ca: fs.readFileSync(caFile),}, this.callback)
     },
     'should respond with 200': function (err, res, body) {
       assert.equal(res.statusCode, 200); //status is 200
@@ -198,9 +253,13 @@ vows.describe('ApiCheck').addBatch({
       assert.isTrue(Object.keys(JSON.parse(body)[0]).length === 4);
     }
   },
-  'Get Projects http://127.0.0.1:3000/tst/projekte': {
+  'Get Projects https://127.0.0.1:3000/tst/projekte': {
     topic: function(){
-      request({url:'http://127.0.0.1:3000/tst/projekte'}, this.callback)
+      request({
+        url:'https://127.0.0.1:3000/tst/projekte',
+        cert: fs.readFileSync(certFile),
+        key: fs.readFileSync(keyFile),
+        ca: fs.readFileSync(caFile),}, this.callback)
     },
     'should respond with 200': function (err, res, body) {
       assert.equal(res.statusCode, 200); //status is 200
@@ -224,9 +283,13 @@ vows.describe('ApiCheck').addBatch({
       assert.isTrue(Object.keys(JSON.parse(body)[0]).length === 7);
     }
   },
-  'Get Childprojects http://127.0.0.1:3000/tst/teilprojekte': {
+  'Get Childprojects https://127.0.0.1:3000/tst/teilprojekte': {
     topic: function(){
-      request({url:'http://127.0.0.1:3000/tst/teilprojekte',qs: {name:'Childproject1'}}, this.callback)
+      request({url:'https://127.0.0.1:3000/tst/teilprojekte',
+        cert: fs.readFileSync(certFile),
+        key: fs.readFileSync(keyFile),
+        ca: fs.readFileSync(caFile),
+        qs: {name:'Childproject1'}}, this.callback)
     },
     'should respond with 200': function (err, res, body) {
       assert.equal(res.statusCode, 200); //status is 200
@@ -254,12 +317,17 @@ vows.describe('ApiCheck').addBatch({
       assert.isTrue(Object.keys(JSON.parse(body)[0]).length === 11);
     }
   },
-  'Get Times http://127.0.0.1:3000/tst/zeiterfassung': {
+  'Get Times https://127.0.0.1:3000/tst/zeiterfassung': {
     topic: function(){
-      request({url:'http://127.0.0.1:3000/tst/zeiterfassung',qs: { startDate:  '2005-08-08',
-                                                                      endDate:    '2017-08-08',
-                                                                      startTime:  '05:00:00',
-                                                                      endTime:    '20:00:00'}}, this.callback)
+      request({
+        url:'https://127.0.0.1:3000/tst/zeiterfassung',
+        cert: fs.readFileSync(certFile),
+        key: fs.readFileSync(keyFile),
+        ca: fs.readFileSync(caFile),
+        qs: { startDate:  '2005-08-08',
+              endDate:    '2017-08-08',
+              startTime:  '05:00:00',
+              endTime:    '20:00:00'}}, this.callback)
     },
     'should respond with 200': function (err, res, body) {
       assert.equal(res.statusCode, 200); //status is 200
@@ -271,7 +339,6 @@ vows.describe('ApiCheck').addBatch({
       assert.isObject(res);       // res is object
     },
     'one row contains keys: | idTimes | idEmployee | Lastname | Name | idDuration | Begin | End | idCustomer | Customer | idProject | Project | Project Description | idChildproject | Childproject | Childproject Description | idPlace | Place |': function (err, res, body) {
-      console.log(JSON.parse(body)[0]);
       assert.isTrue(JSON.parse(body)[0].hasOwnProperty("idTimes"));
       assert.isTrue(JSON.parse(body)[0].hasOwnProperty("idEmployee"));
       assert.isTrue(JSON.parse(body)[0].hasOwnProperty("Lastname"));
@@ -295,9 +362,14 @@ vows.describe('ApiCheck').addBatch({
     }
   }
 }).addBatch({
-  'Delete Employee short TST http://127.0.0.1:3000/tst/mitarbeiter': {
+  'Delete Employee short TST https://127.0.0.1:3000/tst/mitarbeiter': {
     topic: function(){
-      request.del({url:'http://127.0.0.1:3000/tst/mitarbeiter',json: { short:'TST'}}, this.callback)
+      request.del({
+        url:'https://127.0.0.1:3000/tst/mitarbeiter',
+        cert: fs.readFileSync(certFile),
+        key: fs.readFileSync(keyFile),
+        ca: fs.readFileSync(caFile),
+        json: { short:'TST'}}, this.callback)
     },
     'should respond with 204': function (err, res, body) {
       assert.equal(res.statusCode, 204); //status is 200
@@ -309,9 +381,14 @@ vows.describe('ApiCheck').addBatch({
       assert.isObject(res);       // res is object
     }
   },
-  'Delete Project Name Project1 http://127.0.0.1:3000/tst/projekte': {
+  'Delete Project Name Project1 https://127.0.0.1:3000/tst/projekte': {
     topic: function(){
-      request.del({url:'http://127.0.0.1:3000/tst/projekte',json: { name:'Project1'}}, this.callback)
+      request.del({
+        url:'https://127.0.0.1:3000/tst/projekte',
+        cert: fs.readFileSync(certFile),
+        key: fs.readFileSync(keyFile),
+        ca: fs.readFileSync(caFile),
+        json: { name:'Project1'}}, this.callback)
     },
     'should respond with 204': function (err, res, body) {
       assert.equal(res.statusCode, 204); //status is 200
@@ -323,9 +400,14 @@ vows.describe('ApiCheck').addBatch({
       assert.isObject(res);       // res is object
     }
   },
-  'Delete Childproject Name Childproject1 http://127.0.0.1:3000/tst/teilprojekte': {
+  'Delete Childproject Name Childproject1 https://127.0.0.1:3000/tst/teilprojekte': {
     topic: function(){
-      request.del({url:'http://127.0.0.1:3000/tst/teilprojekte',json: { name: 'Childproject1'}}, this.callback)
+      request.del({
+        url:'https://127.0.0.1:3000/tst/teilprojekte',
+        cert: fs.readFileSync(certFile),
+        key: fs.readFileSync(keyFile),
+        ca: fs.readFileSync(caFile),
+        json: { name: 'Childproject1'}}, this.callback)
     },
     'should respond with 204': function (err, res, body) {
       assert.equal(res.statusCode, 204); //status is 200
@@ -337,9 +419,13 @@ vows.describe('ApiCheck').addBatch({
       assert.isObject(res);       // res is object
     }
   },
-  'Delete Customer Name Customer1 http://127.0.0.1:3000/tst/kunde': {
+  'Delete Customer Name Customer1 https://127.0.0.1:3000/tst/kunde': {
     topic: function(){
-      request.del({url:'http://127.0.0.1:3000/tst/kunde',json: { name: 'Customer1'}}, this.callback)
+      request.del({url:'https://127.0.0.1:3000/tst/kunde',
+        cert: fs.readFileSync(certFile),
+        key: fs.readFileSync(keyFile),
+        ca: fs.readFileSync(caFile),
+        json: { name: 'Customer1'}}, this.callback)
     },
     'should respond with 204': function (err, res, body) {
       assert.equal(res.statusCode, 204); //status is 200
@@ -351,9 +437,13 @@ vows.describe('ApiCheck').addBatch({
       assert.isObject(res);       // res is object
     }
   },
-  'Delete Place Name Place1 http://127.0.0.1:3000/tst/orte': {
+  'Delete Place Name Place1 https://127.0.0.1:3000/tst/orte': {
     topic: function(){
-      request.del({url:'http://127.0.0.1:3000/tst/orte',json: { name: 'Place1'}}, this.callback)
+      request.del({url:'https://127.0.0.1:3000/tst/orte',
+        cert: fs.readFileSync(certFile),
+        key: fs.readFileSync(keyFile),
+        ca: fs.readFileSync(caFile),
+        json: { name: 'Place1'}}, this.callback)
     },
     'should respond with 204': function (err, res, body) {
       assert.equal(res.statusCode, 204); //status is 200
@@ -366,6 +456,4 @@ vows.describe('ApiCheck').addBatch({
     }
   }
 }).export(module); // Export the Suite
-
-
 
