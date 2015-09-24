@@ -1,0 +1,14 @@
+{
+  "name": "query",
+  "version": "1.0.0",
+  "description": "queries for mariadb",
+  "main": "query.js",
+  "scripts": {
+    "test": "test"
+  },
+  "keywords": [
+    "query"
+  ],
+  "author": "holzmolz",
+  "license": "MIT"
+}
