@@ -55,10 +55,36 @@ var customersQuery = 'SELECT * FROM zeiterfassung.Customers;'
 // | idKunden | Name | create_time |
 var customerQuery = 'SELECT * FROM zeiterfassung.Customers WHERE Name=:name;'
 
+
+// Used to hash based on email
+// returns one row:
+// | idEmployees | Short | hash | create_time |
+// ***********************
+// Only use for verification
+// ***********************
+var hashQuery = 'SELECT '+
+    'Employees.idEmployees, '+
+    'Employees.Short, '+
+    'Employees.Hash, '+
+    'Employees.create_time ' +
+  'FROM zeiterfassung.Employees '+
+  'Where Employees.Short = :user;'
+
 // Used to get all Employees
 // returns n rows:
-// | idKunden | Name | create_time |
-var employeesQuery = 'SELECT * FROM zeiterfassung.Employees;'
+// ***********************
+// DO NOT RETURN HASH!!!!!
+// ***********************
+var employeesQuery = 'SELECT '+
+    'Employees.idEmployees, '+
+    'Employees.Name, '+
+    'Employees.Lastname, '+
+    'Employees.Short, '+
+    'Employees.Email, '+
+    'Employees.Phone, '+
+    'Employees.Locked, '+
+    'create_time '+
+  'FROM zeiterfassung.Employees;'
 
 // Used to get all Places
 // returns n rows:
@@ -110,8 +136,8 @@ var createTimeEntryQuery = 'INSERT INTO '+
 
 // Insert new Employee
 var createEmployeeQuery = 'INSERT INTO '+
-    'Employees (Name,Lastname,Short,Email,Phone,Locked) '+
-    'VALUES (:name,:lastname,:short,:email,:phone,:locked); ';
+    'Employees (Name,Lastname,Short,Email,Phone,Locked,Hash) '+
+    'VALUES (:name,:lastname,:short,:email,:phone,:locked,:hash); ';
 
 // Create new Project
 var createProjectQuery = 'INSERT INTO '+
@@ -133,8 +159,16 @@ var createPlaceQuery = 'INSERT INTO '+
     'Places (Name,Position) '+
     'VALUES (:name,point(:x,:y)); ';
 
+// Create/Update Session
+var createUpdateSessionId = 'INSERT INTO '+
+  'zeiterfassung.Sessions (Short, SessionId, ExpireDate) '+
+  'VALUES(:user, :sessionId, :expireDate) '+
+   'ON DUPLICATE KEY '+
+   'UPDATE SessionId = :sessionId, '+
+        'ExpireDate = :expireDate;';
+
 // Delete Employee based on short Name
-var deleteEmployeeQuery = 'Delete FROM zeiterfassung.Employees WHERE Short=:short;';
+var deleteEmployeeQuery = 'Delete FROM zeiterfassung.Employees WHERE Short=:user;';
 
 // Delete Project based on Name
 var deleteProjectQuery = 'Delete FROM zeiterfassung.Projects WHERE Name=:name;';
@@ -153,7 +187,7 @@ function queryMaria(queryString,options, cb){
   var c = new Client();
   // Preparing the query
   var pq = c.prepare(queryString);
-  //console.log(pq(options));
+  //console.log(queryString);
   logger.info(pq(options));
   // Array which will store the rows
   var result = [];
@@ -169,7 +203,7 @@ function queryMaria(queryString,options, cb){
       })
       .on('error', function(err) {
         cb(err,null);
-        logger.error('Result error: ' + inspect(err));
+        logger.error('Result error: ' + inspect(err) + '  \r\n on query: ' + pq(options));
       })
       .on('end', function(info) {
         logger.info('Result finished successfully');
@@ -225,5 +259,7 @@ module.exports.createCustomerQuery = createCustomerQuery;
 module.exports.deleteCustomerQuery = deleteCustomerQuery;
 module.exports.createPlaceQuery = createPlaceQuery;
 module.exports.deletePlaceQuery = deletePlaceQuery;
+module.exports.hashQuery = hashQuery;
+module.exports.createUpdateSessionId = createUpdateSessionId;
 
 module.exports.queryMaria = queryMaria;

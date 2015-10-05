@@ -3,7 +3,9 @@ var inspect = require('util').inspect;
 var query = require('./query'); //contains all queries
 var logger = require('./config/logging.js');
 var https = require('https');
+var bcrypt = require('bcrypt');
 var fs = require('fs');
+var uuid = require('node-uuid');
 
 var server = new Hapi.Server();
 server.connection({ port: 3000,
@@ -12,17 +14,10 @@ server.connection({ port: 3000,
                       cert: fs.readFileSync('./config/mariadb-backend-server-cert.pem')
                     }
 });
-/*
-var options = {
-  tls: {
-    key: fs.readFileSync('./config/mariadb-backend-server-key.pem'),
-    cert: fs.readFileSync('./config/mariadb-backend-server-cert.pem')
-  }
-};
-*/
 
 function replyResult(err, result, code, reply){
   if (err){
+    logger.error(err);
     reply({'err':err}).code(code);
     return;
   }
@@ -102,6 +97,48 @@ server.route([
             code = 400; // Bad Request
           }
           replyResult(err,result,code,reply);
+        });
+      }
+    }
+  },
+  {
+    path: '/login',
+    method: 'Post',
+    config: {
+      handler: function(req, reply) {
+        // Query login
+        // console.log(req.payload);
+        query.queryMaria(query.hashQuery, req.payload, function(err, hashResult){
+          var code = 400; // OK
+          if(hashResult[0]){
+            // Verify login
+            bcrypt.compare(req.payload.password, hashResult[0].Hash, function(err, valide) {
+              if(valide===true){
+                var expireDate = new Date();
+                expireDate.setTime( expireDate.getTime() + 1 * 86400000 );
+                var parameters ={
+                                  user: req.payload.user,
+                                  sessionId: uuid.v4(),
+                                  expireDate: expireDate.toISOString()
+                                };
+                query.queryMaria(query.createUpdateSessionId, parameters, function(err, result){
+                  if(err){
+                    // User and Password ok Error during sessionId creation
+                    return replyResult(err,[{ 'valide': true, 'sessionId': '' }],code,reply);
+                  }
+                  code = 200;
+                  // User and Password ok sessionId created
+                  return replyResult(err,[{ 'valide': true, 'sessionId': parameters.sessionId }],code,reply);
+                });
+              } else {
+                // Password wrong
+                return replyResult(err,[{ 'valide': false, 'sessionId':''}],code,reply);
+              }
+            });
+          }else{
+            // User wrong
+            return replyResult(err,[{ 'valide': false, 'sessionId':''}],code,reply);
+          }
         });
       }
     }
@@ -225,12 +262,19 @@ server.route([
     method: 'POST',
     config: {
       handler: function(req, reply) {
-        query.queryMaria(query.createEmployeeQuery, req.payload, function(err, result){
-          var code = 201;
-          if(err){
-            code = 400; //Bad Request
-          }
-          replyResult(err,result,code,reply);
+        var parameters = req.payload;
+        bcrypt.genSalt(10, function(err, salt) {
+          bcrypt.hash(req.payload.password, salt, function(err, hash) {
+            parameters.hash = hash;
+            // Store hash in your password DB.
+            query.queryMaria(query.createEmployeeQuery, parameters, function(err, result){
+              var code = 201;
+              if(err){
+                code = 400; //Bad Request
+              }
+              replyResult(err,result,code,reply);
+            });
+          });
         });
       }
     }
@@ -341,6 +385,15 @@ server.route([
     }
   }
 ]);
+
+server.register(require('hapi-auth-cookie'), function (err) {
+    server.auth.strategy('session', 'cookie', {
+        password: 'supersecretpassword',
+        cookie: 'maria-backend',
+        redirectTo: '/login',
+        isSecure: false
+    });
+});
 
 server.start(function () {
   logger.info('Server running at: %s', server.info.uri);

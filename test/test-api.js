@@ -9,6 +9,10 @@ var certFile = path.resolve('./config/maria-backend-client-cert.pem')
 var keyFile = path.resolve('./config/maria-backend-client-key.pem')
 var caFile = path.resolve('./config/mariadb-ca.pem')
 
+
+//ToDo: Insert hash verification
+//ToDo: If verification succesfull generate session token (time based)
+//ToDO: Step above can maybe use hapi-auth-cookie module
 vows.describe('ApiCheck').addBatch({
   'Post Employee short TST https://127.0.0.1:3000/tst/mitarbeiter': {
     topic: function(){
@@ -20,14 +24,15 @@ vows.describe('ApiCheck').addBatch({
         json:
           { name:     'tst',
             lastname: 'Mustermann',
-            short:    'TST',
-            email:    'dickeLiebhaber84@yahoo.com',
+            short:    'tst',
+            password: '123456',
+            email:    'dickerLiebhaber84@yahoo.com',
             phone:    '0815',
             locked:   '0'
           }}, this.callback)
     },
     'should respond with 201': function (err, res, body) {
-      assert.equal(res.statusCode, 201); //status is 200
+      assert.equal(res.statusCode, 201); //status is 201
     },
     'should not have an error': function (err, res, body) {
       assert.isNull(err);       // We have no error
@@ -36,6 +41,7 @@ vows.describe('ApiCheck').addBatch({
       assert.isObject(res);       // res is object
     }
   },
+}).addBatch({
   'Post Project https://127.0.0.1:3000/tst/projekte': {
     topic: function(){
       request.post({
@@ -85,7 +91,7 @@ vows.describe('ApiCheck').addBatch({
         cert: fs.readFileSync(certFile),
         key: fs.readFileSync(keyFile),
         ca: fs.readFileSync(caFile),
-        json: {  name: 'Customer1'}}, this.callback)
+        json: { name: 'Customer1'}}, this.callback)
     },
     'should respond with 201': function (err, res, body) {
       assert.equal(res.statusCode, 201); //status is 200
@@ -173,6 +179,61 @@ vows.describe('ApiCheck').addBatch({
       assert.isTrue(Object.keys(JSON.parse(body)[0]).length === 8);
     }
   },
+  'Check Employees correct password https://127.0.0.1:3000/login': {
+    topic: function(){
+      request.post({
+        url:'https://127.0.0.1:3000/login',
+        cert: fs.readFileSync(certFile),
+        key: fs.readFileSync(keyFile),
+        ca: fs.readFileSync(caFile),
+        json: { user: 'tst',
+                password:'123456'}}, this.callback)
+    },
+    'should respond with 200': function (err, res, body) {
+      assert.equal(res.statusCode, 200); //status is 200
+    },
+    'should not have an error': function (err, res, body) {
+      assert.isNull(err);       // We have no error
+    },
+    'res should be an object': function (err, res, body) {
+      assert.isObject(res);       // res is object
+    }    ,
+    'body valide should be true = password correct': function (err, res, body) {
+      assert.isTrue(body[0].hasOwnProperty('valide'));
+      assert.isTrue(body[0].valide);
+    },
+    'body should contain sessionId': function (err, res, body) {
+      assert.isTrue(body[0].hasOwnProperty('sessionId'));
+    }
+  }  ,
+  'Check Employees incorrect password https://127.0.0.1:3000/login': {
+    topic: function(){
+      request.post({
+        url:'https://127.0.0.1:3000/login',
+        cert: fs.readFileSync(certFile),
+        key: fs.readFileSync(keyFile),
+        ca: fs.readFileSync(caFile),
+        json: { user: 'tst',
+                password:'1234567'}}, this.callback)
+    },
+    'should respond with 200': function (err, res, body) {
+      assert.equal(res.statusCode, 400); //status is 200
+    },
+    'should not have an error': function (err, res, body) {
+      assert.isNull(err);       // We have no error
+    },
+    'res should be an object': function (err, res, body) {
+      assert.isObject(res);       // res is object
+    },
+    'body valide should be false = password incorrect': function (err, res, body) {
+      assert.isTrue(body[0].hasOwnProperty('valide'));
+      assert.isFalse(body[0].valide);
+    },
+    'body should contain sessionId': function (err, res, body) {
+      assert.isTrue(body[0].hasOwnProperty('sessionId'));
+      assert.equal(body[0].sessionId,'');
+    }
+  },
   'Get Customers https://127.0.0.1:3000/tst/kunden': {
     topic: function(){
       request({
@@ -206,7 +267,7 @@ vows.describe('ApiCheck').addBatch({
         cert: fs.readFileSync(certFile),
         key: fs.readFileSync(keyFile),
         ca: fs.readFileSync(caFile),
-       qs: {name:'Customer1'}}, this.callback)
+        qs: {name:'Customer1'}}, this.callback)
     },
     'should respond with 200': function (err, res, body) {
       assert.equal(res.statusCode, 200); //status is 200
@@ -369,7 +430,7 @@ vows.describe('ApiCheck').addBatch({
         cert: fs.readFileSync(certFile),
         key: fs.readFileSync(keyFile),
         ca: fs.readFileSync(caFile),
-        json: { short:'TST'}}, this.callback)
+        json: { user:'TST'}}, this.callback)
     },
     'should respond with 204': function (err, res, body) {
       assert.equal(res.statusCode, 204); //status is 200
