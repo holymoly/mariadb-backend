@@ -159,14 +159,6 @@ var createPlaceQuery = 'INSERT INTO '+
     'Places (Name,Position) '+
     'VALUES (:name,point(:x,:y)); ';
 
-// Create/Update Session
-var createUpdateSessionId = 'INSERT INTO '+
-  'zeiterfassung.Sessions (Short, SessionId, ExpireDate) '+
-  'VALUES(:user, :sessionId, :expireDate) '+
-   'ON DUPLICATE KEY '+
-   'UPDATE SessionId = :sessionId, '+
-        'ExpireDate = :expireDate;';
-
 // Delete Employee based on short Name
 var deleteEmployeeQuery = 'Delete FROM zeiterfassung.Employees WHERE Short=:user;';
 
@@ -260,6 +252,5 @@ module.exports.deleteCustomerQuery = deleteCustomerQuery;
 module.exports.createPlaceQuery = createPlaceQuery;
 module.exports.deletePlaceQuery = deletePlaceQuery;
 module.exports.hashQuery = hashQuery;
-module.exports.createUpdateSessionId = createUpdateSessionId;
 
 module.exports.queryMaria = queryMaria;

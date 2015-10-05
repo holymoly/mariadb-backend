@@ -8,13 +8,26 @@ var fs = require('fs');
 var uuid = require('node-uuid');
 
 var server = new Hapi.Server();
-server.connection({ port: 3000,
-                    tls: {
-                      key: fs.readFileSync('./config/mariadb-backend-server-key.pem'),
-                      cert: fs.readFileSync('./config/mariadb-backend-server-cert.pem')
-                    }
+server.connection({
+  port: 3000,
+  tls:
+  {
+    key: fs.readFileSync('./config/mariadb-backend-server-key.pem'),
+    cert: fs.readFileSync('./config/mariadb-backend-server-cert.pem')
+  }
 });
 
+// Setup cookie based authentication
+server.register(require('hapi-auth-cookie'), function (err){
+  server.auth.strategy('session', 'cookie',{
+    password: 'secret',
+    cookie: 'maria-backend',
+    redirectTo: '/login',
+    isSecure: true
+  })
+});
+
+// Reply for every route
 function replyResult(err, result, code, reply){
   if (err){
     logger.error(err);
@@ -44,7 +57,8 @@ server.route([
           }
           replyResult(err,result,code,reply);
         });
-      }
+      },
+      auth: 'session'
     }
   },
   {
@@ -62,7 +76,8 @@ server.route([
           }
           replyResult(err,result,code,reply);
         });
-      }
+      },
+      auth: 'session'
     }
   },
   {
@@ -80,7 +95,8 @@ server.route([
           }
           replyResult(err,result,code,reply);
         });
-      }
+      },
+      auth: 'session'
     }
   },
   {
@@ -98,7 +114,8 @@ server.route([
           }
           replyResult(err,result,code,reply);
         });
-      }
+      },
+      auth: 'session'
     }
   },
   {
@@ -114,32 +131,23 @@ server.route([
             // Verify login
             bcrypt.compare(req.payload.password, hashResult[0].Hash, function(err, valide) {
               if(valide===true){
-                var expireDate = new Date();
-                expireDate.setTime( expireDate.getTime() + 1 * 86400000 );
-                var parameters ={
-                                  user: req.payload.user,
-                                  sessionId: uuid.v4(),
-                                  expireDate: expireDate.toISOString()
-                                };
-                query.queryMaria(query.createUpdateSessionId, parameters, function(err, result){
-                  if(err){
-                    // User and Password ok Error during sessionId creation
-                    return replyResult(err,[{ 'valide': true, 'sessionId': '' }],code,reply);
-                  }
                   code = 200;
                   // User and Password ok sessionId created
-                  return replyResult(err,[{ 'valide': true, 'sessionId': parameters.sessionId }],code,reply);
-                });
+                  req.auth.session.set({ id: req.payload.user });
+                  return replyResult(err,[{ 'valide': true }],code,reply);
               } else {
                 // Password wrong
-                return replyResult(err,[{ 'valide': false, 'sessionId':''}],code,reply);
+                return replyResult(err,[{ 'valide': false }],code,reply);
               }
             });
           }else{
             // User wrong
-            return replyResult(err,[{ 'valide': false, 'sessionId':''}],code,reply);
+            return replyResult(err,[{ 'valide': false }],code,reply);
           }
         });
+      },
+      plugins: {
+        'hapi-auth-cookie': {redirectTo: false}
       }
     }
   },
@@ -158,7 +166,8 @@ server.route([
           }
           replyResult(err,result,code,reply);
         });
-      }
+      },
+      auth: 'session'
     }
   },
   {
@@ -176,7 +185,8 @@ server.route([
           }
           replyResult(err,result,code,reply);
         });
-      }
+      },
+      auth: 'session'
     }
   },
   {
@@ -194,19 +204,8 @@ server.route([
           }
           replyResult(err,result,code,reply);
         });
-      }
-    }
-  },
-  {
-    path: '/api/items/{itemId}',
-    method: 'PUT',
-    config: {
-      handler: function(req, reply) {
-        req.item.set(req.body);
-        req.item.save(function(err, item) {
-          reply(item).code(204);
-        });
-      }
+      },
+      auth: 'session'
     }
   },
   {
@@ -224,7 +223,8 @@ server.route([
           }
           replyResult(err,result,code,reply);
         });
-      }
+      },
+      auth: 'session'
     }
   },
   {
@@ -239,7 +239,8 @@ server.route([
           }
           replyResult(err,result,code,reply);
         });
-      }
+      },
+      auth: 'session'
     }
   },
   {
@@ -254,7 +255,8 @@ server.route([
           }
           replyResult(err,result,code,reply);
         });
-      }
+      },
+      auth: 'session'
     }
   },
   {
@@ -291,7 +293,8 @@ server.route([
           }
           replyResult(err,result,code,reply);
         });
-      }
+      },
+      auth: 'session'
     }
   },
   {
@@ -306,7 +309,8 @@ server.route([
           }
           replyResult(err,result,code,reply);
         });
-      }
+      },
+      auth: 'session'
     }
   },
   {
@@ -321,7 +325,8 @@ server.route([
           }
           replyResult(err,result,code,reply);
         });
-      }
+      },
+      auth: 'session'
     }
   },
   {
@@ -336,7 +341,8 @@ server.route([
           }
           replyResult(err,result,code,reply);
         });
-      }
+      },
+      auth: 'session'
     }
   },
   {
@@ -351,7 +357,8 @@ server.route([
           }
           replyResult(err,result,code,reply);
         });
-      }
+      },
+      auth: 'session'
     }
   },
   {
@@ -366,7 +373,8 @@ server.route([
           }
           replyResult(err,result,code,reply);
         });
-      }
+      },
+      auth: 'session'
     }
   },
   {
@@ -381,20 +389,13 @@ server.route([
           }
           replyResult(err,result,code,reply);
         });
-      }
+      },
+      auth: 'session'
     }
   }
 ]);
 
-server.register(require('hapi-auth-cookie'), function (err) {
-    server.auth.strategy('session', 'cookie', {
-        password: 'supersecretpassword',
-        cookie: 'maria-backend',
-        redirectTo: '/login',
-        isSecure: false
-    });
-});
-
+// Start server ;)
 server.start(function () {
   logger.info('Server running at: %s', server.info.uri);
   logger.info(server.info);
