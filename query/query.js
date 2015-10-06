@@ -231,7 +231,7 @@ function queryMaria(queryString,options, cb){
     //    }
 
     c.connect(mariadbConfig);
-}
+};
 
 module.exports.timeEntriesQuery = timeEntriesQuery;
 module.exports.createTimeEntryQuery = createTimeEntryQuery;

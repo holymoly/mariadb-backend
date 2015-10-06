@@ -10,9 +10,6 @@ var certFile = path.resolve('./config/maria-backend-client-cert.pem');
 var keyFile = path.resolve('./config/maria-backend-client-key.pem');
 var caFile = path.resolve('./config/mariadb-ca.pem');
 
-//ToDo: Insert hash verification
-//ToDo: If verification succesfull generate session token (time based)
-//ToDO: Step above can maybe use hapi-auth-cookie module
 vows.describe('ApiCheck').addBatch({
   'Post Employee short TST https://127.0.0.1:3000/tst/mitarbeiter': {
     topic: function(){

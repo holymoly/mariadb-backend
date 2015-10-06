@@ -3,9 +3,17 @@ var inspect = require('util').inspect;
 var query = require('./query'); //contains all queries
 var logger = require('./config/logging.js');
 var https = require('https');
-var bcrypt = require('bcrypt');
 var fs = require('fs');
-var uuid = require('node-uuid');
+var bcrypt = require('bcrypt');
+
+// Controllers: handling routes logic
+var Login = require('./controllers/login');
+var Employees = require('./controllers/employees');
+var Projects = require('./controllers/projects');
+var TimeEntries = require('./controllers/time-entries');
+var Customers = require('./controllers/customers');
+var ChildProjects = require('./controllers/child-projects');
+var Places = require('./controllers/places');
 
 var server = new Hapi.Server();
 server.connection({
@@ -27,371 +35,101 @@ server.register(require('hapi-auth-cookie'), function (err){
   })
 });
 
-// Reply for every route
-function replyResult(err, result, code, reply){
-  if (err){
-    logger.error(err);
-    reply({'err':err}).code(code);
-    return;
-  }
-  reply(result).code(code);
-}
-
 server.route([
   {
     path: '/{id}/zeiterfassung',
     method: 'GET',
-    config: {
-      handler: function(req, reply) {
-        //Query zeiterfassung
-        var parameters = { short: req.params.id,
-                           startDate: req.query.startDate,
-                           endDate: req.query.endDate,
-                           startTime: req.query.startTime,
-                           endTime: req.query.endTime };
-        query.queryMaria(query.timeEntriesQuery, parameters, function(err, result){
-          // Set HTTP Status Code
-          var code = 200; // OK
-          if(err){
-            code = 400; // Bad Request
-          }
-          replyResult(err,result,code,reply);
-        });
-      },
-      auth: 'session'
-    }
+    config: TimeEntries.getTimeEntries
   },
   {
     path: '/{id}/kunden',
     method: 'GET',
-    config: {
-      handler: function(req, reply) {
-        // Query kunden
-        var parameters = {};
-        query.queryMaria(query.customersQuery, parameters, function(err, result){
-          // Set HTTP Status Code
-          var code = 200; // OK
-          if(err){
-            code = 400; // Bad Request
-          }
-          replyResult(err,result,code,reply);
-        });
-      },
-      auth: 'session'
-    }
+    config: Customers.getCustomers
   },
   {
     path: '/{id}/kunde',
     method: 'GET',
-    config: {
-      handler: function(req, reply) {
-        // Query kunde
-        var parameters = {name: req.query.name};
-        query.queryMaria(query.customerQuery, parameters, function(err, result){
-          // Set HTTP Status Code
-          var code = 200; // OK
-          if(err){
-            code = 400; // Bad Request
-          }
-          replyResult(err,result,code,reply);
-        });
-      },
-      auth: 'session'
-    }
+    config: Customers.getCustomer
   },
   {
     path: '/{id}/mitarbeiter',
     method: 'GET',
-    config: {
-      handler: function(req, reply) {
-        // Query mitarbeiter
-        var parameters = {};
-        query.queryMaria(query.employeesQuery, parameters, function(err, result){
-          // Set HTTP Status Code
-          var code = 200; // OK
-          if(err){
-            code = 400; // Bad Request
-          }
-          replyResult(err,result,code,reply);
-        });
-      },
-      auth: 'session'
-    }
+    config: Employees.getEmployees
   },
   {
     path: '/login',
     method: 'Post',
-    config: {
-      handler: function(req, reply) {
-        // Query login
-        // console.log(req.payload);
-        query.queryMaria(query.hashQuery, req.payload, function(err, hashResult){
-          var code = 400; // OK
-          if(hashResult[0]){
-            // Verify login
-            bcrypt.compare(req.payload.password, hashResult[0].Hash, function(err, valide) {
-              if(valide===true){
-                  code = 200;
-                  // User and Password ok sessionId created
-                  req.auth.session.set({ id: req.payload.user });
-                  return replyResult(err,[{ 'valide': true }],code,reply);
-              } else {
-                // Password wrong
-                return replyResult(err,[{ 'valide': false }],code,reply);
-              }
-            });
-          }else{
-            // User wrong
-            return replyResult(err,[{ 'valide': false }],code,reply);
-          }
-        });
-      },
-      plugins: {
-        'hapi-auth-cookie': {redirectTo: false}
-      }
-    }
+    config: Login.login
   },
   {
     path: '/{id}/projekte',
     method: 'GET',
-    config: {
-      handler: function(req, reply) {
-        // Query projekte
-        var parameters = {};
-        query.queryMaria(query.projectsQuery, parameters, function(err, result){
-          // Set HTTP Status Code
-          var code = 200; // OK
-          if(err){
-            code = 400; // Bad Request
-          }
-          replyResult(err,result,code,reply);
-        });
-      },
-      auth: 'session'
-    }
+    config: Projects.getProjects
   },
   {
     path: '/{id}/teilprojekte',
     method: 'GET',
-    config: {
-      handler: function(req, reply) {
-        // Query Teilprojekte per project
-        var parameters = {name: req.query.name};
-        query.queryMaria(query.childProjectsQuery, parameters, function(err, result){
-          // Set HTTP Status Code
-          var code = 200; // OK
-          if(err){
-            code = 400; // Bad Request
-          }
-          replyResult(err,result,code,reply);
-        });
-      },
-      auth: 'session'
-    }
+    config: ChildProjects.getChildProjects
   },
   {
     path: '/{id}/orte',
     method: 'GET',
-    config: {
-      handler: function(req, reply) {
-        // Query Teilprojekte per project
-        var parameters = {};
-        query.queryMaria(query.placesQuery, parameters, function(err, result){
-          // Set HTTP Status Code
-          var code = 200; // OK
-          if(err){
-            code = 400; // Bad Request
-          }
-          replyResult(err,result,code,reply);
-        });
-      },
-      auth: 'session'
-    }
+    config: Places.getPlaces
   },
   {
     path: '/{id}/zeiterfassung',
     method: 'POST',
-    config: {
-      handler: function(req, reply) {
-        // add {id}to parameter as mitarbeiter
-        var parameters = req.payload;
-        parameters.short =  req.params.id;
-        query.queryMaria(query.createTimeEntryQuery, parameters, function(err, result){
-          var code = 201;
-          if(err){
-            code = 400; //Bad Request
-          }
-          replyResult(err,result,code,reply);
-        });
-      },
-      auth: 'session'
-    }
+    config: TimeEntries.postTimeEntry
   },
   {
     path: '/{id}/projekte',
     method: 'POST',
-    config: {
-      handler: function(req, reply) {
-        query.queryMaria(query.createProjectQuery, req.payload, function(err, result){
-          var code = 201;
-          if(err){
-            code = 400; //Bad Request
-          }
-          replyResult(err,result,code,reply);
-        });
-      },
-      auth: 'session'
-    }
+    config: Projects.postProject
   },
   {
     path: '/{id}/teilprojekte',
     method: 'POST',
-    config: {
-      handler: function(req, reply) {
-        query.queryMaria(query.createChildprojectQuery, req.payload, function(err, result){
-          var code = 201;
-          if(err){
-            code = 400; //Bad Request
-          }
-          replyResult(err,result,code,reply);
-        });
-      },
-      auth: 'session'
-    }
+    config: ChildProjects.postChildProject
   },
   {
     path: '/{id}/mitarbeiter',
     method: 'POST',
-    config: {
-      handler: function(req, reply) {
-        var parameters = req.payload;
-        bcrypt.genSalt(10, function(err, salt) {
-          bcrypt.hash(req.payload.password, salt, function(err, hash) {
-            parameters.hash = hash;
-            // Store hash in your password DB.
-            query.queryMaria(query.createEmployeeQuery, parameters, function(err, result){
-              var code = 201;
-              if(err){
-                code = 400; //Bad Request
-              }
-              replyResult(err,result,code,reply);
-            });
-          });
-        });
-      }
-    }
+    config: Employees.postEmployees
   },
   {
     path: '/{id}/kunde',
     method: 'POST',
-    config: {
-      handler: function(req, reply) {
-        query.queryMaria(query.createCustomerQuery, req.payload, function(err, result){
-          var code = 201;
-          if(err){
-            code = 400; //Bad Request
-          }
-          replyResult(err,result,code,reply);
-        });
-      },
-      auth: 'session'
-    }
+    config: Customers.postCustomer
   },
   {
     path: '/{id}/orte',
     method: 'POST',
-    config: {
-      handler: function(req, reply) {
-        query.queryMaria(query.createPlaceQuery, req.payload, function(err, result){
-          var code = 201;
-          if(err){
-            code = 400; //Bad Request
-          }
-          replyResult(err,result,code,reply);
-        });
-      },
-      auth: 'session'
-    }
+    config: Places.postPlace
   },
   {
     path: '/{id}/mitarbeiter',
     method: 'DELETE',
-    config: {
-      handler: function(req, reply) {
-        query.queryMaria(query.deleteEmployeeQuery, req.payload, function(err, result){
-          var code = 204;
-          if(err){
-            code = 400; //Bad Request
-          }
-          replyResult(err,result,code,reply);
-        });
-      },
-      auth: 'session'
-    }
+    config: Employees.deleteEmployee
   },
   {
     path: '/{id}/projekte',
     method: 'DELETE',
-    config: {
-      handler: function(req, reply) {
-        query.queryMaria(query.deleteProjectQuery, req.payload, function(err, result){
-          var code = 204;
-          if(err){
-            code = 400; //Bad Request
-          }
-          replyResult(err,result,code,reply);
-        });
-      },
-      auth: 'session'
-    }
+    config: Projects.deleteProject
   },
   {
     path: '/{id}/teilprojekte',
     method: 'DELETE',
-    config: {
-      handler: function(req, reply) {
-        query.queryMaria(query.deleteChildprojectQuery, req.payload, function(err, result){
-          var code = 204;
-          if(err){
-            code = 400; //Bad Request
-          }
-          replyResult(err,result,code,reply);
-        });
-      },
-      auth: 'session'
-    }
+    config: ChildProjects.deleteChildProject
   },
   {
     path: '/{id}/kunde',
     method: 'DELETE',
-    config: {
-      handler: function(req, reply) {
-        query.queryMaria(query.deleteCustomerQuery, req.payload, function(err, result){
-          var code = 204;
-          if(err){
-            code = 400; //Bad Request
-          }
-          replyResult(err,result,code,reply);
-        });
-      },
-      auth: 'session'
-    }
+    config: Customers.deleteCustomer
   },
   {
     path: '/{id}/orte',
     method: 'DELETE',
-    config: {
-      handler: function(req, reply) {
-        query.queryMaria(query.deletePlaceQuery, req.payload, function(err, result){
-          var code = 204;
-          if(err){
-            code = 400; //Bad Request
-          }
-          replyResult(err,result,code,reply);
-        });
-      },
-      auth: 'session'
-    }
+    config: Places.deletePlace
   }
 ]);
 
@@ -401,7 +139,7 @@ server.start(function () {
   logger.info(server.info);
 });
 
-//used to set log level
+// used to set log level
 module.exports.setLevel = function(level) {
   if (level==='test') {
     logger.remove('info-console');
@@ -410,7 +148,7 @@ module.exports.setLevel = function(level) {
   };
 }
 
-//used to stop the server
+// used to stop the server
 module.exports.stopServer = function() {
   server.stop({ timeout: 60 * 1000 }, function (err) {
     logger.info('Server stopped');
