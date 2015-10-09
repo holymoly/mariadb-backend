@@ -10,7 +10,17 @@ var certFile = path.resolve('./config/maria-backend-client-cert.pem');
 var keyFile = path.resolve('./config/maria-backend-client-key.pem');
 var caFile = path.resolve('./config/mariadb-ca.pem');
 
+var idEmployee ='';
+var idCustomer ='';
+var idChildproject ='';
+var idProject = '';
+var idCustomer = '';
+var idDuration = '';
+var idPlace ='';
+var idTime = '';
+
 vows.describe('ApiCheck').addBatch({
+  // ################################################################
   'Post Employee short TST https://127.0.0.1:3000/tst/mitarbeiter': {
     topic: function(){
       request.post({
@@ -38,7 +48,9 @@ vows.describe('ApiCheck').addBatch({
       assert.isObject(res);       // res is object
     }
   },
+  // ################################################################
 }).addBatch({
+  // ################################################################
   'Check Employees correct password https://127.0.0.1:3000/login': {
     topic: function(){
       request.post({
@@ -87,7 +99,9 @@ vows.describe('ApiCheck').addBatch({
       assert.isFalse(body[0].valide);
     }
   }
+  // ################################################################
 }).addBatch({
+  // ################################################################
   'Post Project https://127.0.0.1:3000/tst/projekte': {
     topic: function(){
       request.post({
@@ -127,7 +141,7 @@ vows.describe('ApiCheck').addBatch({
       assert.isNull(err);       // We have no error
     },
     'res should be an object': function (err, res, body) {
-      assert.isObject(res);       // res is object
+      assert.isObject(res);     // res is object
     }
   },
   'Post Customer https://127.0.0.1:3000/tst/kunde': {
@@ -146,7 +160,7 @@ vows.describe('ApiCheck').addBatch({
       assert.isNull(err);       // We have no error
     },
     'res should be an object': function (err, res, body) {
-      assert.isObject(res);       // res is object
+      assert.isObject(res);     // res is object
     }
   },
   'Post Orte https://127.0.0.1:3000/tst/orte': {
@@ -167,7 +181,7 @@ vows.describe('ApiCheck').addBatch({
       assert.isNull(err);       // We have no error
     },
     'res should be an object': function (err, res, body) {
-      assert.isObject(res);       // res is object
+      assert.isObject(res);     // res is object
     }
   },
   'Post Time https://127.0.0.1:3000/tst/zeiterfassung': {
@@ -190,10 +204,12 @@ vows.describe('ApiCheck').addBatch({
       assert.isNull(err);       // We have no error
     },
     'res should be an object': function (err, res, body) {
-      assert.isObject(res);       // res is object
+      assert.isObject(res);     // res is object
     }
   }
+  // ################################################################
 }).addBatch({
+  // ################################################################
   'Get Employees https://127.0.0.1:3000/tst/mitarbeiter': {
     topic: function(){
       request({
@@ -209,7 +225,7 @@ vows.describe('ApiCheck').addBatch({
       assert.isNull(err);       // We have no error
     },
     'res should be an object': function (err, res, body) {
-      assert.isObject(res);       // res is object
+      assert.isObject(res);     // res is object
     },
     'one row contains keys: idEmployees,Name,Lastname,Short,Email,Phone,Locked,create_time': function (err, res, body) {
       assert.isTrue(JSON.parse(body)[0].hasOwnProperty("idEmployees"));
@@ -243,6 +259,7 @@ vows.describe('ApiCheck').addBatch({
       assert.isObject(res);       // res is object
     },
     'one row contains keys: idCustomers,Name,create_time': function (err, res, body) {
+      idCustomer = JSON.parse(body)[0].idCustomers;
       assert.isTrue(JSON.parse(body)[0].hasOwnProperty("idCustomers"));
       assert.isTrue(JSON.parse(body)[0].hasOwnProperty("Name"));
       assert.isTrue(JSON.parse(body)[0].hasOwnProperty("create_time"));
@@ -267,9 +284,10 @@ vows.describe('ApiCheck').addBatch({
       assert.isNull(err);       // We have no error
     },
     'res should be an object': function (err, res, body) {
-      assert.isObject(res);       // res is object
+      assert.isObject(res);     // res is object
     },
     'one row contains keys: idCustomers,Name,create_time': function (err, res, body) {
+      idCustomer = JSON.parse(body)[0].idCustomers;
       assert.isTrue(JSON.parse(body)[0].hasOwnProperty("idCustomers"));
       assert.isTrue(JSON.parse(body)[0].hasOwnProperty("Name"));
       assert.isTrue(JSON.parse(body)[0].hasOwnProperty("create_time"));
@@ -293,7 +311,7 @@ vows.describe('ApiCheck').addBatch({
       assert.isNull(err);       // We have no error
     },
     'res should be an object': function (err, res, body) {
-      assert.isObject(res);       // res is object
+      assert.isObject(res);     // res is object
     },
     'one row contains keys: idPlaces,Name,Position,create_time': function (err, res, body) {
       assert.isTrue(JSON.parse(body)[0].hasOwnProperty("idPlaces"));
@@ -320,9 +338,10 @@ vows.describe('ApiCheck').addBatch({
       assert.isNull(err);       // We have no error
     },
     'res should be an object': function (err, res, body) {
-      assert.isObject(res);       // res is object
+      assert.isObject(res);     // res is object
     },
     'one row contains keys: idProjects,Name,Description,create_time,Customers_idCustomers,Customer,Customer_create_time': function (err, res, body) {
+      idProject = JSON.parse(body)[0].idProjects;
       assert.isTrue(JSON.parse(body)[0].hasOwnProperty("idProjects"));
       assert.isTrue(JSON.parse(body)[0].hasOwnProperty("Name"));
       assert.isTrue(JSON.parse(body)[0].hasOwnProperty("Description"));
@@ -350,9 +369,10 @@ vows.describe('ApiCheck').addBatch({
       assert.isNull(err);       // We have no error
     },
     'res should be an object': function (err, res, body) {
-      assert.isObject(res);       // res is object
+      assert.isObject(res);     // res is object
     },
     'one row contains keys: idChildprojects,Name,Description,create_time,Projects_idProjects,Projects_Name,Projekte_Beschreibung,Projects_create_time,Projects_idCustomer,Customer_name,Customer_create_time': function (err, res, body) {
+      idChildproject = JSON.parse(body)[0].idChildproject;
       assert.isTrue(JSON.parse(body)[0].hasOwnProperty("idChildproject"));
       assert.isTrue(JSON.parse(body)[0].hasOwnProperty("Name"));
       assert.isTrue(JSON.parse(body)[0].hasOwnProperty("Description"));
@@ -388,13 +408,16 @@ vows.describe('ApiCheck').addBatch({
       assert.isNull(err);       // We have no error
     },
     'res should be an object': function (err, res, body) {
-      assert.isObject(res);       // res is object
+      assert.isObject(res);     // res is object
     },
     'one row contains keys: | idTimes | idEmployee | Lastname | Name | idDuration | Begin | End | idCustomer | Customer | idProject | Project | Project Description | idChildproject | Childproject | Childproject Description | idPlace | Place |': function (err, res, body) {
+      idTime = JSON.parse(body)[0].idTimes;
       assert.isTrue(JSON.parse(body)[0].hasOwnProperty("idTimes"));
+      idEmployee = JSON.parse(body)[0].idEmployee;
       assert.isTrue(JSON.parse(body)[0].hasOwnProperty("idEmployee"));
       assert.isTrue(JSON.parse(body)[0].hasOwnProperty("Lastname"));
       assert.isTrue(JSON.parse(body)[0].hasOwnProperty("Name"));
+      idDuration = JSON.parse(body)[0].idDuration;
       assert.isTrue(JSON.parse(body)[0].hasOwnProperty("idDuration"));
       assert.isTrue(JSON.parse(body)[0].hasOwnProperty("Begin"));
       assert.isTrue(JSON.parse(body)[0].hasOwnProperty("End"));
@@ -406,6 +429,7 @@ vows.describe('ApiCheck').addBatch({
       assert.isTrue(JSON.parse(body)[0].hasOwnProperty("idChildproject"));
       assert.isTrue(JSON.parse(body)[0].hasOwnProperty("Childproject"));
       assert.isTrue(JSON.parse(body)[0].hasOwnProperty("Childproject Description"));
+      idPlace = JSON.parse(body)[0].idPlace;
       assert.isTrue(JSON.parse(body)[0].hasOwnProperty("idPlace"));
       assert.isTrue(JSON.parse(body)[0].hasOwnProperty("Place"));
     },
@@ -413,7 +437,158 @@ vows.describe('ApiCheck').addBatch({
       assert.isTrue(Object.keys(JSON.parse(body)[0]).length === 17);
     }
   }
+  // ################################################################
 }).addBatch({
+  // ################################################################
+  'Update Employee short TST https://127.0.0.1:3000/tst/mitarbeiter': {
+    topic: function(){
+      request.put({
+        url: 'https://127.0.0.1:3000/tst/mitarbeiter',
+        cert: fs.readFileSync(certFile),
+        key: fs.readFileSync(keyFile),
+        ca: fs.readFileSync(caFile),
+        json:
+          { id:       idEmployee,
+            name:     'tst',
+            lastname: 'Mustermann',
+            short:    'tst',
+            password: '123456',
+            email:    'schnuffel@yahoo.com',
+            phone:    '0815',
+            locked:   '0'
+          }}, this.callback)
+    },
+    'should respond with 200': function (err, res, body) {
+      assert.equal(res.statusCode, 200); //status is 201
+    },
+    'should not have an error': function (err, res, body) {
+      assert.isNull(err);       // We have no error
+    },
+    'res should be an object': function (err, res, body) {
+      assert.isObject(res);       // res is object
+    }
+  },
+  'Update Customer name https://127.0.0.1:3000/tst/kunde': {
+    topic: function(){
+      request.put({
+        url: 'https://127.0.0.1:3000/tst/kunde',
+        cert: fs.readFileSync(certFile),
+        key: fs.readFileSync(keyFile),
+        ca: fs.readFileSync(caFile),
+        json:
+          { id:       idCustomer,
+            name:     'Customer2'
+          }}, this.callback)
+    },
+    'should respond with 200': function (err, res, body) {
+      assert.equal(res.statusCode, 200); //status is 201
+    },
+    'should not have an error': function (err, res, body) {
+      assert.isNull(err);       // We have no error
+    },
+    'res should be an object': function (err, res, body) {
+      assert.isObject(res);       // res is object
+    }
+  },
+  'Update Childproject name https://127.0.0.1:3000/tst/teilprojekte': {
+    topic: function(){
+      request.put({
+        url: 'https://127.0.0.1:3000/tst/teilprojekte',
+        cert: fs.readFileSync(certFile),
+        key: fs.readFileSync(keyFile),
+        ca: fs.readFileSync(caFile),
+        json:
+          { id:       idChildproject,
+            name:     'Child project 2',
+            description: 'description new',
+            idProjects: idProject
+          }}, this.callback)
+    },
+    'should respond with 200': function (err, res, body) {
+      assert.equal(res.statusCode, 200); //status is 201
+    },
+    'should not have an error': function (err, res, body) {
+      assert.isNull(err);       // We have no error
+    },
+    'res should be an object': function (err, res, body) {
+      assert.isObject(res);       // res is object
+    }
+  },
+  'Update Project name https://127.0.0.1:3000/tst/projekte': {
+    topic: function(){
+      request.put({
+        url: 'https://127.0.0.1:3000/tst/projekte',
+        cert: fs.readFileSync(certFile),
+        key: fs.readFileSync(keyFile),
+        ca: fs.readFileSync(caFile),
+        json:
+          { id:       idProject,
+            name:     'project 2234',
+            description: 'description new',
+            idCustomers: idCustomer
+          }}, this.callback)
+    },
+    'should respond with 200': function (err, res, body) {
+      assert.equal(res.statusCode, 200); //status is 201
+    },
+    'should not have an error': function (err, res, body) {
+      assert.isNull(err);       // We have no error
+    },
+    'res should be an object': function (err, res, body) {
+      assert.isObject(res);       // res is object
+    }
+  },
+  'Update Time Entry name https://127.0.0.1:3000/tst/zeiterfassung': {
+    topic: function(){
+      request.put({
+        url: 'https://127.0.0.1:3000/tst/zeiterfassung',
+        cert: fs.readFileSync(certFile),
+        key: fs.readFileSync(keyFile),
+        ca: fs.readFileSync(caFile),
+        json:
+          { id: idTime,
+            idEmployees: idEmployee,
+            idDurations: idDuration,
+            idChildprojects: idChildproject,
+            idPlaces: idPlace,
+            work: 'work test'
+          }}, this.callback)
+    },
+    'should respond with 200': function (err, res, body) {
+      assert.equal(res.statusCode, 200); //status is 201
+    },
+    'should not have an error': function (err, res, body) {
+      assert.isNull(err);       // We have no error
+    },
+    'res should be an object': function (err, res, body) {
+      assert.isObject(res);       // res is object
+    }
+  },
+  'Update Place X Coordinate https://127.0.0.1:3000/tst/orte': {
+    topic: function(){
+      request.put({
+        url: 'https://127.0.0.1:3000/tst/orte',
+        cert: fs.readFileSync(certFile),
+        key: fs.readFileSync(keyFile),
+        ca: fs.readFileSync(caFile),
+        json: { id: idPlace,
+                name: 'Midgard',
+                x: 2,
+                y: 5 }}, this.callback)
+    },
+    'should respond with 200': function (err, res, body) {
+      assert.equal(res.statusCode, 200); //status is 201
+    },
+    'should not have an error': function (err, res, body) {
+      assert.isNull(err);       // We have no error
+    },
+    'res should be an object': function (err, res, body) {
+      assert.isObject(res);       // res is object
+    }
+  }
+  // ################################################################
+}).addBatch({
+  // ################################################################
   'Delete Employee short TST https://127.0.0.1:3000/tst/mitarbeiter': {
     topic: function(){
       request.del({
@@ -430,7 +605,7 @@ vows.describe('ApiCheck').addBatch({
       assert.isNull(err);       // We have no error
     },
     'res should be an object': function (err, res, body) {
-      assert.isObject(res);       // res is object
+      assert.isObject(res);     // res is object
     }
   },
   'Delete Project Name Project1 https://127.0.0.1:3000/tst/projekte': {
@@ -449,7 +624,7 @@ vows.describe('ApiCheck').addBatch({
       assert.isNull(err);       // We have no error
     },
     'res should be an object': function (err, res, body) {
-      assert.isObject(res);       // res is object
+      assert.isObject(res);     // res is object
     }
   },
   'Delete Childproject Name Childproject1 https://127.0.0.1:3000/tst/teilprojekte': {
@@ -468,7 +643,7 @@ vows.describe('ApiCheck').addBatch({
       assert.isNull(err);       // We have no error
     },
     'res should be an object': function (err, res, body) {
-      assert.isObject(res);       // res is object
+      assert.isObject(res);     // res is object
     }
   },
   'Delete Customer Name Customer1 https://127.0.0.1:3000/tst/kunde': {
@@ -486,7 +661,7 @@ vows.describe('ApiCheck').addBatch({
       assert.isNull(err);       // We have no error
     },
     'res should be an object': function (err, res, body) {
-      assert.isObject(res);       // res is object
+      assert.isObject(res);     // res is object
     }
   },
   'Delete Place Name Place1 https://127.0.0.1:3000/tst/orte': {
@@ -504,7 +679,15 @@ vows.describe('ApiCheck').addBatch({
       assert.isNull(err);       // We have no error
     },
     'res should be an object': function (err, res, body) {
-      assert.isObject(res);       // res is object
+      assert.isObject(res);     // res is object
+    }
+  }
+  // ################################################################
+}).addBatch({
+  // ################################################################
+  'Shut Down Server': {
+    topic: function(){
+      app.stopServer()
     }
   }
 }).export(module); // Export the Suite

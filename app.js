@@ -15,6 +15,9 @@ var Customers = require('./controllers/customers');
 var ChildProjects = require('./controllers/child-projects');
 var Places = require('./controllers/places');
 
+// Configure server
+// ToDo: add CORS
+// ToDo: change Delete routes using ID
 var server = new Hapi.Server();
 server.connection({
   port: 3000,
@@ -35,11 +38,32 @@ server.register(require('hapi-auth-cookie'), function (err){
   })
 });
 
+// All routes, logic can be found under ./controllers/
 server.route([
   {
-    path: '/{id}/zeiterfassung',
+    path: '/login',
+    method: 'Post',
+    config: Login.login
+  },
+  {
+    path: '/{id}/mitarbeiter',
     method: 'GET',
-    config: TimeEntries.getTimeEntries
+    config: Employees.getEmployees
+  },
+  {
+    path: '/{id}/mitarbeiter',
+    method: 'POST',
+    config: Employees.postEmployees
+  },
+  {
+    path: '/{id}/mitarbeiter',
+    method: 'PUT',
+    config: Employees.updateEmployee
+  },
+  {
+    path: '/{id}/mitarbeiter',
+    method: 'DELETE',
+    config: Employees.deleteEmployee
   },
   {
     path: '/{id}/kunden',
@@ -52,14 +76,19 @@ server.route([
     config: Customers.getCustomer
   },
   {
-    path: '/{id}/mitarbeiter',
-    method: 'GET',
-    config: Employees.getEmployees
+    path: '/{id}/kunde',
+    method: 'POST',
+    config: Customers.postCustomer
   },
   {
-    path: '/login',
-    method: 'Post',
-    config: Login.login
+    path: '/{id}/kunde',
+    method: 'PUT',
+    config: Customers.updateCustomer
+  },
+  {
+    path: '/{id}/kunde',
+    method: 'DELETE',
+    config: Customers.deleteCustomer
   },
   {
     path: '/{id}/projekte',
@@ -67,49 +96,14 @@ server.route([
     config: Projects.getProjects
   },
   {
-    path: '/{id}/teilprojekte',
-    method: 'GET',
-    config: ChildProjects.getChildProjects
-  },
-  {
-    path: '/{id}/orte',
-    method: 'GET',
-    config: Places.getPlaces
-  },
-  {
-    path: '/{id}/zeiterfassung',
-    method: 'POST',
-    config: TimeEntries.postTimeEntry
-  },
-  {
     path: '/{id}/projekte',
     method: 'POST',
     config: Projects.postProject
   },
   {
-    path: '/{id}/teilprojekte',
-    method: 'POST',
-    config: ChildProjects.postChildProject
-  },
-  {
-    path: '/{id}/mitarbeiter',
-    method: 'POST',
-    config: Employees.postEmployees
-  },
-  {
-    path: '/{id}/kunde',
-    method: 'POST',
-    config: Customers.postCustomer
-  },
-  {
-    path: '/{id}/orte',
-    method: 'POST',
-    config: Places.postPlace
-  },
-  {
-    path: '/{id}/mitarbeiter',
-    method: 'DELETE',
-    config: Employees.deleteEmployee
+    path: '/{id}/projekte',
+    method: 'PUT',
+    config: Projects.updateProject
   },
   {
     path: '/{id}/projekte',
@@ -118,13 +112,58 @@ server.route([
   },
   {
     path: '/{id}/teilprojekte',
+    method: 'GET',
+    config: ChildProjects.getChildProjects
+  },
+  {
+    path: '/{id}/teilprojekte',
+    method: 'POST',
+    config: ChildProjects.postChildProject
+  },
+  {
+    path: '/{id}/teilprojekte',
+    method: 'PUT',
+    config: ChildProjects.updateChildProject
+  },
+  {
+    path: '/{id}/teilprojekte',
     method: 'DELETE',
     config: ChildProjects.deleteChildProject
   },
   {
-    path: '/{id}/kunde',
+    path: '/{id}/zeiterfassung',
+    method: 'GET',
+    config: TimeEntries.getTimeEntries
+  },
+  {
+    path: '/{id}/zeiterfassung',
+    method: 'POST',
+    config: TimeEntries.postTimeEntry
+  },
+  {
+    path: '/{id}/zeiterfassung',
+    method: 'PUT',
+    config: TimeEntries.updateTimeEntry
+  },
+  {
+    path: '/{id}/zeiterfassung',
     method: 'DELETE',
-    config: Customers.deleteCustomer
+    config: TimeEntries.deleteTimeEntry
+  },
+  {
+    path: '/{id}/orte',
+    method: 'GET',
+    config: Places.getPlaces
+  },
+  {
+    path: '/{id}/orte',
+    method: 'POST',
+    config: Places.postPlace
+  },
+  {
+    path: '/{id}/orte',
+    method: 'PUT',
+    config: Places.updatePlace
   },
   {
     path: '/{id}/orte',

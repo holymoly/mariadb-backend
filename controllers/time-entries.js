@@ -37,3 +37,32 @@ module.exports.postTimeEntry = {
   },
   auth: 'session'
 }
+
+module.exports.updateTimeEntry = {
+  handler: function(req, reply) {
+    // add {id}to parameter as mitarbeiter
+    var parameters = req.payload;
+    parameters.short =  req.params.id;
+    query.queryMaria(query.updateTimeEntryQuery, parameters, function(err, result){
+      var code = 200;
+      if(err){
+        code = 400; //Bad Request
+      }
+      replyResult.replyResult(err,result,code,reply);
+    });
+  },
+  auth: 'session'
+}
+
+module.exports.deleteTimeEntry = {
+  handler: function(req, reply) {
+    query.queryMaria(query.deleteTimeEntry, req.payload, function(err, result){
+      var code = 204;
+      if(err){
+        code = 400; //Bad Request
+      }
+      replyResult.replyResult(err,result,code,reply);
+    });
+  },
+  auth: 'session'
+}

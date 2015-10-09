@@ -7,43 +7,43 @@ var fs = require('fs');
 var mariadbConfig = JSON.parse(fs.readFileSync('./config/mariadb.json'));
 
 // Selection of the queries needed
-// For better readability Strings are appended by the plus sign to keep better readability.
+// For better readability Strings are appended by the plus sign.
 // Javascript is not capable of multiline strings.
-// the notation :someName is used to dynamicaly change values on runtime
+// the notation :someName is used to dynamicaly change values during runtime
 
 // Used to get all timeentries based on :name, :startDate, :endDate, :startTime, :endTime
 // returns n rows:
 // | idTimes | idEmployee | Lastname | Name | idDuration | Begin | End | idCustomer | Customer | idProject | Project | Project Description | idChildproject | Childproject | Childproject Description | idPlace | Place |
 var timeEntriesQuery = 'SELECT '+
-  '`Times`.`idTimes`, '+
-  '`Times`.`Employees_idEmployees` as `idEmployee`, '+
-  '`Employees`.`Lastname`, '+
-  '`Employees`.`Name`, '+
-  '`Times`.`Durations_idDurations` as `idDuration`, '+
-  '`Durations`.`Begin`, '+
-  '`Durations`.`End`, '+
-  '`Projects`.`Customers_idCustomers` as `idCustomer`, '+
-  '`Customers`.`Name` as `Customer`, '+
-  '`Childprojects`.`Projects_idProjects` as `idProject`, '+
-  '`Projects`.`Name`as `Project`, ' +
-  '`Projects`.`Description`as `Project Description`, '+
-  '`Times`.`Childprojects_idChildprojects` as `idChildproject`, '+
-  '`Childprojects`.`Name`as `Childproject`, '+
-  '`Childprojects`.`Description`as `Childproject Description`, '+
-  '`Times`.`Places_idPlaces` as `idPlace`, '+
-  '`Places`.`Name` as `Place` '+
-'FROM Times '+
-  'INNER JOIN `Employees` ON `Times`.`Employees_idEmployees` = `Employees`.`idEmployees` '+
-  'INNER JOIN `Durations` ON `Times`.`Durations_idDurations` = `Durations`.`idDurations` '+
-  'INNER JOIN `Places` ON `Times`.`Places_idPlaces` = `Places`.`idPlaces` '+
-  'INNER JOIN `Childprojects` ON `Times`.`Childprojects_idChildprojects` = `Childprojects`.`idChildprojects` '+
-  'INNER JOIN `Projects` ON `Childprojects`.`Projects_idProjects` = `Projects`.`idProjects` '+
-  'INNER JOIN `Customers` ON `Projects`.`Customers_idCustomers` = `Customers`.`idCustomers` '+
-'WHERE `Employees`.`Short` = :short '+
-  'AND DATE_FORMAT(`Durations`.`Begin`, "%Y-%m-%d") >= :startDate '+
-  'AND DATE_FORMAT(`Durations`.`End`, "%Y-%m-%d") <= :endDate '+
-  'AND DATE_FORMAT(`Durations`.`Begin`, "%H:%i:%S") > :startTime  '+
-  'AND DATE_FORMAT(`Durations`.`End`, "%H:%i:%S") < :endTime ;';
+    '`Times`.`idTimes`, '+
+    '`Times`.`Employees_idEmployees` as `idEmployee`, '+
+    '`Employees`.`Lastname`, '+
+    '`Employees`.`Name`, '+
+    '`Times`.`Durations_idDurations` as `idDuration`, '+
+    '`Durations`.`Begin`, '+
+    '`Durations`.`End`, '+
+    '`Projects`.`Customers_idCustomers` as `idCustomer`, '+
+    '`Customers`.`Name` as `Customer`, '+
+    '`Childprojects`.`Projects_idProjects` as `idProject`, '+
+    '`Projects`.`Name`as `Project`, ' +
+    '`Projects`.`Description`as `Project Description`, '+
+    '`Times`.`Childprojects_idChildprojects` as `idChildproject`, '+
+    '`Childprojects`.`Name`as `Childproject`, '+
+    '`Childprojects`.`Description`as `Childproject Description`, '+
+    '`Times`.`Places_idPlaces` as `idPlace`, '+
+    '`Places`.`Name` as `Place` '+
+  'FROM Times '+
+    'INNER JOIN `Employees` ON `Times`.`Employees_idEmployees` = `Employees`.`idEmployees` '+
+    'INNER JOIN `Durations` ON `Times`.`Durations_idDurations` = `Durations`.`idDurations` '+
+    'INNER JOIN `Places` ON `Times`.`Places_idPlaces` = `Places`.`idPlaces` '+
+    'INNER JOIN `Childprojects` ON `Times`.`Childprojects_idChildprojects` = `Childprojects`.`idChildprojects` '+
+    'INNER JOIN `Projects` ON `Childprojects`.`Projects_idProjects` = `Projects`.`idProjects` '+
+    'INNER JOIN `Customers` ON `Projects`.`Customers_idCustomers` = `Customers`.`idCustomers` '+
+  'WHERE `Employees`.`Short` = :short '+
+    'AND DATE_FORMAT(`Durations`.`Begin`, "%Y-%m-%d") >= :startDate '+
+    'AND DATE_FORMAT(`Durations`.`End`, "%Y-%m-%d") <= :endDate '+
+    'AND DATE_FORMAT(`Durations`.`Begin`, "%H:%i:%S") > :startTime  '+
+    'AND DATE_FORMAT(`Durations`.`End`, "%H:%i:%S") < :endTime ;';
 
 // Used to get all Custommers
 // returns n rows:
@@ -55,13 +55,12 @@ var customersQuery = 'SELECT * FROM zeiterfassung.Customers;'
 // | idKunden | Name | create_time |
 var customerQuery = 'SELECT * FROM zeiterfassung.Customers WHERE Name=:name;'
 
-
 // Used to hash based on email
 // returns one row:
 // | idEmployees | Short | hash | create_time |
-// ***********************
-// Only use for verification
-// ***********************
+// **************************
+// Only use for verification!
+// **************************
 var hashQuery = 'SELECT '+
     'Employees.idEmployees, '+
     'Employees.Short, '+
@@ -174,12 +173,93 @@ var deleteCustomerQuery = 'Delete FROM zeiterfassung.`Customers` WHERE Name=:nam
 // Delete Place based on Name
 var deletePlaceQuery = 'Delete FROM zeiterfassung.`Places` WHERE Name=:name;';
 
+// Updates UserGroups
+var updateUserGroupsQuery = 'Update zeiterfassung.UserGroups '+
+  'Set Employees_idEmployees = :idEmployes, '+
+      'Groups_idGroups = :idGroups '+
+  'Where idUserGroups = :id;';
+
+// Updates Times
+var updateTimeEntryQuery = 'Update zeiterfassung.Times '+
+  'Set Durations_idDurations = :idDurations, '+
+      'Places_idPlaces = :idPlaces, '+
+      'Employees_idEmployees = :idEmployees, '+
+      'Childprojects_idChildprojects = :idChildprojects, '+
+      'Work = :work '+
+  'Where idTimes = :id;';
+
+// Updates Childprojects
+var updateChildprojectQuery = 'Update zeiterfassung.Childprojects '+
+  'Set Name = :name, '+
+      'Description = :description, '+
+      'Projects_idProjects = :idProjects '+
+  'Where idChildprojects = :id;';
+
+// Updates Durations
+var updateDurationsQuery = 'Update zeiterfassung.Durations '+
+  'Set Begin = :begin, '+
+      'End = :end '+
+  'Where idDurations = :id;';
+
+// Updates
+var updateRightsQuery = 'Update zeiterfassung.Rights '+
+  'Set Name = :name '+
+  'Where idRights = :id;';
+
+// Updates Rights
+var updateEmployeeQuery = 'Update zeiterfassung.Employees '+
+  'Set Name = :name, '+
+      'Lastname = :lastname, '+
+      'Short = :short, '+
+      'Email = :email, '+
+      'Phone = :phone '+
+      /*
+      'Locked = :locked, '+
+      'Hash = :hash '+
+      */
+  'Where idEmployees = :id;';
+
+// Updates Groups
+var updateGroupsQuery = 'Update zeiterfassung.Groups '+
+  'Set Name = :name '+
+  'Where idGroups = :id;';
+
+// Updates Projects
+var updateProjectQuery = 'Update zeiterfassung.Projects '+
+  'Set Name = :name, '+
+      'Description = :description, '+
+      'Customers_idCustomers = :idCustomers '+
+  'Where idProjects = :id;';
+
+// Updates ProjectsEmployees
+var updateProjectsEmployeesQuery = 'Update zeiterfassung.ProjectsEmployees '+
+  'Set Projects_idProjects = :idProjects, '+
+      'Employees_idEmployees = :idEmployees '+
+  'Where idProjectsEmployees = :id;';
+
+// Updates GroupRights
+var updateGroupRightsQuery = 'Update zeiterfassung.GroupRights '+
+  'Set Groups_idGroups = :idGroups, '+
+      'Rights_idRights = :idRights '+
+  'Where idGroupRights = :id;';
+
+// Updates Places
+var updatePlaceQuery = 'Update zeiterfassung.Places '+
+  'Set Name = :name, '+
+      'Position = point(:x,:y) '+
+  'Where idPlaces = :id;';
+
+// Updates Customers
+var updateCustomerQuery = 'Update zeiterfassung.Customers '+
+  'Set Name = :name '+
+  'Where idCustomers = :id;';
+
 // Asking MariaDB
 function queryMaria(queryString,options, cb){
   var c = new Client();
   // Preparing the query
   var pq = c.prepare(queryString);
-  //console.log(queryString);
+  // console.log(queryString);
   logger.info(pq(options));
   // Array which will store the rows
   var result = [];
@@ -252,5 +332,18 @@ module.exports.deleteCustomerQuery = deleteCustomerQuery;
 module.exports.createPlaceQuery = createPlaceQuery;
 module.exports.deletePlaceQuery = deletePlaceQuery;
 module.exports.hashQuery = hashQuery;
+
+module.exports.updateUserGroupsQuery = updateUserGroupsQuery;
+module.exports.updateTimeEntryQuery = updateTimeEntryQuery;
+module.exports.updateChildprojectQuery = updateChildprojectQuery;
+module.exports.updateDurationsQuery = updateDurationsQuery;
+module.exports.updateRightsQuery = updateRightsQuery;
+module.exports.updateEmployeeQuery = updateEmployeeQuery;
+module.exports.updateGroupsQuery = updateGroupsQuery;
+module.exports.updateProjectQuery = updateProjectQuery;
+module.exports.updateProjectsEmployeesQuery = updateProjectsEmployeesQuery;
+module.exports.updateGroupRightsQuery = updateGroupRightsQuery;
+module.exports.updatePlaceQuery = updatePlaceQuery;
+module.exports.updateCustomerQuery = updateCustomerQuery;
 
 module.exports.queryMaria = queryMaria;

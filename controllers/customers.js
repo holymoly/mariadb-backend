@@ -47,6 +47,19 @@ module.exports.postCustomer = {
   auth: 'session'
 }
 
+module.exports.updateCustomer = {
+  handler: function(req, reply) {
+    query.queryMaria(query.updateCustomerQuery, req.payload, function(err, result){
+      var code = 200;
+      if(err){
+        code = 400; //Bad Request
+      }
+      replyResult.replyResult(err,result,code,reply);
+    });
+  },
+  auth: 'session'
+}
+
 module.exports.deleteCustomer = {
   handler: function(req, reply) {
     query.queryMaria(query.deleteCustomerQuery, req.payload, function(err, result){

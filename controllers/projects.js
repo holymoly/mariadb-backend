@@ -31,6 +31,19 @@ module.exports.postProject = {
   auth: 'session'
 }
 
+module.exports.updateProject = {
+  handler: function(req, reply) {
+    query.queryMaria(query.updateProjectQuery, req.payload, function(err, result){
+      var code = 200;
+      if(err){
+        code = 400; //Bad Request
+      }
+      replyResult.replyResult(err,result,code,reply);
+    });
+  },
+  auth: 'session'
+}
+
 module.exports.deleteProject = {
   handler: function(req, reply) {
     query.queryMaria(query.deleteProjectQuery, req.payload, function(err, result){

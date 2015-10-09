@@ -31,6 +31,19 @@ module.exports.postPlace = {
   auth: 'session'
 }
 
+module.exports.updatePlace = {
+  handler: function(req, reply) {
+    query.queryMaria(query.updatePlaceQuery, req.payload, function(err, result){
+      var code = 200;
+      if(err){
+        code = 400; //Bad Request
+      }
+      replyResult.replyResult(err,result,code,reply);
+    });
+  },
+  auth: 'session'
+}
+
 module.exports.deletePlace = {
   handler: function(req, reply) {
     query.queryMaria(query.deletePlaceQuery, req.payload, function(err, result){

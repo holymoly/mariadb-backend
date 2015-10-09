@@ -41,6 +41,19 @@ module.exports.postEmployees = {
   */
 }
 
+module.exports.updateEmployee = {
+  handler: function(req, reply) {
+    query.queryMaria(query.updateEmployeeQuery, req.payload, function(err, result){
+      var code = 200;
+      if(err){
+        code = 400; //Bad Request
+      }
+      replyResult.replyResult(err,result,code,reply);
+    });
+  },
+  auth: 'session'
+}
+
 module.exports.deleteEmployee = {
   handler: function(req, reply) {
     query.queryMaria(query.deleteEmployeeQuery, req.payload, function(err, result){
